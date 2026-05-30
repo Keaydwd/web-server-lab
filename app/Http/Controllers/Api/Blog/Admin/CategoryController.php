@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Blog\Admin;
 
 //use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+//use Illuminate\Http\Request;
 use App\Models\BlogCategory;
 use Illuminate\Support\Str;
+use App\Http\Requests\BlogCategoryUpdateRequest;
+use App\Http\Requests\BlogCategoryCreateRequest;
 
 class CategoryController extends BaseController
 {
@@ -21,20 +23,23 @@ class CategoryController extends BaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BlogCategoryCreateRequest $request)
     {
-        $data = $request->all();
+        $data = $request->input(); // отримаємо масив даних, які надійшли з форми
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']);
+        if (empty($data['slug'])) { // якщо псевдонім порожній
+            $data['slug'] = Str::slug($data['title']); // генеруємо псевдонім
         }
 
-        $item = BlogCategory::create($data);
+        $item = (new BlogCategory())->create($data); // створюємо об'єкт і додаємо в БД
 
         if ($item) {
-            return ['success' => 'Успішно створено', 'id' => $item->id];
+            return [
+                'success' => true,
+                'message' => 'Успішно збережено'
+            ];
         } else {
-            return ['msg' => 'Помилка створення'];
+            return ['message' => 'Помилка збереження'];
         }
     }
 
@@ -49,7 +54,7 @@ class CategoryController extends BaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(BlogCategoryUpdateRequest $request, string $id)
     {
         $item = BlogCategory::find($id);
 
