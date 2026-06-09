@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\BlogPost;
 use App\Http\Requests\BlogPostCreateRequest;
+use App\Jobs\BlogPostAfterCreateJob;
+use App\Jobs\BlogPostAfterDeleteJob;
 
 class PostController extends BaseController
 {
@@ -30,10 +32,13 @@ class PostController extends BaseController
 
     public function store(BlogPostCreateRequest $request)
     {
-        $data = $request->input(); // отримаємо масив даних, які надійшли з форми
-        $item = (new BlogPost())->create($data); // створюємо об'єкт і додаємо в БД
+        $data = $request->input();
+        $item = (new BlogPost())->create($data);
 
         if ($item) {
+            // Викликаємо Job створення
+            BlogPostAfterCreateJob::dispatch($item);
+
             return ['success' => true, 'message' => 'Успішно збережено', 'id' => $item->id];
         } else {
             return ['success' => false, 'message' => 'Помилка збереження'];
@@ -65,10 +70,12 @@ class PostController extends BaseController
 
     public function destroy(string $id)
     {
-        $result = BlogPost::destroy($id); // софт деліт, запис лишається в базі, але стає "невидимим"
-        // $result = BlogPost::find($id)->forceDelete(); // повне видалення з БД
+        $result = BlogPost::destroy($id);
 
         if ($result) {
+            // Викликаємо Job видалення із затримкою у 20 секунд
+            BlogPostAfterDeleteJob::dispatch($id)->delay(20);
+
             return ['success' => true, 'message' => "Запис з id [$id] успішно видалено"];
         } else {
             return ['success' => false, 'message' => 'Помилка видалення або запис не знайдено'];
