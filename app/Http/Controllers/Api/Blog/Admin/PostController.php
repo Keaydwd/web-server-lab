@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Blog\Admin;
 use App\Repositories\BlogPostRepository;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Requests\BlogPostUpdateRequest;
-use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
@@ -36,22 +35,14 @@ class PostController extends BaseController
     {
         $item = $this->blogPostRepository->getEdit($id);
 
-        if (empty($item)) { // якщо ід не знайдено
+        if (empty($item)) {
             return ['message' => "Запис id=[{$id}] не знайдено"];
         }
 
-        $data = $request->all(); // отримаємо масив даних, які надійшли з форми
+        $data = $request->all();
 
-        if (empty($data['slug'])) { // якщо псевдонім порожній
-            $data['slug'] = Str::slug($data['title']); // генеруємо псевдонім
-        }
-
-        if (empty($item->published_at) && isset($data['is_published']) && $data['is_published']) {
-            // якщо поле published_at порожнє і нам прийшло 1 (або true) в ключі is_published
-            $data['published_at'] = Carbon::now(); // генеруємо поточну дату
-        }
-
-        $result = $item->update($data); // оновлюємо дані об'єкта і зберігаємо в БД
+        // Обсервер сам перехопить модель всередині цього методу оновлення!
+        $result = $item->update($data);
 
         if ($result) {
             return [
