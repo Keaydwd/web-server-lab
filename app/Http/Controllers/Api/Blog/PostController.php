@@ -18,4 +18,20 @@ class PostController extends BaseController
     {
         return $this->blogPostRepository->getAllWithPaginate();
     }
+
+    /**
+     * Отримати один пост.
+     */
+    public function show(int $id)
+    {
+        $post = $this->blogPostRepository->getOneById($id);
+
+        if (empty($post)) {
+            return response()->json([
+                'message' => "Пост з id={$id} не знайдено",
+            ], 404);
+        }
+
+        return $post;
+    }
 }

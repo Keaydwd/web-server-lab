@@ -38,6 +38,17 @@ class BlogPostRepository extends CoreRepository
         return $result;
     }
 
+    public function getOneById(int $id)
+    {
+        return $this
+            ->startConditions()
+            ->with([
+                'category:id,title',
+                'user:id,name',
+            ])
+            ->find($id);
+    }
+
     /**
      * Отримати модель для редагування в адмінці
      * @param int $id

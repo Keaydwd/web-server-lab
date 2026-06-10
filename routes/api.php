@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\Blog\Admin\CategoryController;
 Route::prefix('blog')->group(function () {
     Route::get('posts', [BlogPostController::class, 'index'])
         ->name('blog.posts.index');
+
+    Route::get('posts/{id}', [BlogPostController::class, 'show'])
+        ->name('blog.posts.show');
 });
 
 // Адмінка
