@@ -1,11 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Blog\Admin\PostController;
-
+use App\Http\Controllers\Api\Blog\PostController as BlogPostController;
+use App\Http\Controllers\Api\Blog\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Api\Blog\Admin\CategoryController;
 
+Route::prefix('blog')->group(function () {
+    Route::get('posts', [BlogPostController::class, 'index'])
+        ->name('blog.posts.index');
+});
 
 // Адмінка
 $groupData = [
@@ -15,12 +18,13 @@ $groupData = [
 Route::group($groupData, function () {
     // BlogCategory
     $methods = ['index', 'store', 'update'];
+
     Route::apiResource('categories', CategoryController::class)
         ->only($methods)
         ->names('blog.admin.categories');
 
     // BlogPost
-    Route::apiResource('posts', PostController::class)
+    Route::apiResource('posts', AdminPostController::class)
         ->except(['show'])
         ->names('blog.admin.posts');
 });
