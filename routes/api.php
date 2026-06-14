@@ -19,15 +19,12 @@ $groupData = [
 ];
 
 Route::group($groupData, function () {
-    // BlogCategory
-    $methods = ['index', 'store', 'update'];
+    Route::get('categories-list', [CategoryController::class, 'list'])
+        ->name('blog.admin.categories.list');
 
     Route::apiResource('categories', CategoryController::class)
-        ->only($methods)
         ->names('blog.admin.categories');
 
-    // BlogPost
     Route::apiResource('posts', AdminPostController::class)
-        ->except(['show'])
         ->names('blog.admin.posts');
 });

@@ -52,7 +52,7 @@ class BlogCategoryRepository extends CoreRepository
      */
     public function getAllWithPaginate($perPage = null)
     {
-        $columns = ['id', 'title', 'parent_id'];
+        $columns = ['id', 'title', 'slug', 'description', 'parent_id'];
 
         $result = $this
             ->startConditions()
@@ -61,5 +61,16 @@ class BlogCategoryRepository extends CoreRepository
             ->paginate($perPage);
 
         return $result;
+    }
+    /**
+     * Отримати всі категорії для списків у формах.
+     */
+    public function getAllForSelect()
+    {
+        return $this
+            ->startConditions()
+            ->select(['id', 'title', 'parent_id'])
+            ->orderBy('id')
+            ->get();
     }
 }

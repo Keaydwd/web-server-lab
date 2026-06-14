@@ -21,7 +21,17 @@ class PostResource extends JsonResource
 
             'slug' => $this->slug,
 
+            'excerpt' => $this->excerpt,
+
+            'content_raw' => $this->content_raw,
+
+            'content_html' => $this->content_html,
+
             'is_published' => (bool) $this->is_published,
+
+            'published_at' => $this->published_at
+                ? $this->published_at->format('Y-m-d H:i:s')
+                : null,
 
             'date_published' => $this->published_at
                 ? $this->published_at->format('Y-m-d H:i:s')
