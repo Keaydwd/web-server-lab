@@ -22,6 +22,13 @@ class BlogPost extends Model
         'is_published',
         'published_at'
     ];
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+            'published_at' => 'datetime',
+        ];
+    }
 
     /**
      * Категорія статті

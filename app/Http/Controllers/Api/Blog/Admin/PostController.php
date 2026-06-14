@@ -11,6 +11,7 @@ use App\Models\BlogPost;
 use App\Http\Requests\BlogPostCreateRequest;
 use App\Jobs\BlogPostAfterCreateJob;
 use App\Jobs\BlogPostAfterDeleteJob;
+use App\Http\Resources\Api\Blog\Admin\PostResource;
 
 class PostController extends BaseController
 {
@@ -27,7 +28,8 @@ class PostController extends BaseController
     public function index()
     {
         $paginator = $this->blogPostRepository->getAllWithPaginate();
-        return $paginator;
+
+        return PostResource::collection($paginator);
     }
 
     public function store(BlogPostCreateRequest $request)
