@@ -7,6 +7,7 @@ use App\Http\Requests\BlogCategoryUpdateRequest;
 use App\Http\Requests\BlogCategoryCreateRequest;
 use App\Repositories\BlogCategoryRepository;
 use App\Http\Resources\Api\Blog\Admin\CategoryResource;
+use Illuminate\Http\Request;
 
 class CategoryController extends BaseController
 {
@@ -21,9 +22,15 @@ class CategoryController extends BaseController
     /**
      * Список категорій з пагінацією.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $paginator = $this->blogCategoryRepository->getAllWithPaginate(5);
+        $perPage = (int) $request->input('per_page', 5);
+        $perPage = max(1, min($perPage, 100));
+
+        $search = trim((string) $request->input('search', ''));
+        $search = $search !== '' ? $search : null;
+
+        $paginator = $this->blogCategoryRepository->getAllWithPaginate($perPage, $search);
 
         return CategoryResource::collection($paginator);
     }

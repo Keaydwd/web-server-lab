@@ -46,19 +46,39 @@ class BlogCategoryRepository extends CoreRepository
     }
 
     /**
-     * Отримати категорію для виводу пагінатором
-     * * @param int|null $perPage
-     * * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * Отримати список категорій з пошуком і пагінацією.
      */
-    public function getAllWithPaginate($perPage = null)
+    public function getAllWithPaginate($perPage = 5, ?string $search = null)
     {
-        $columns = ['id', 'title', 'slug', 'description', 'parent_id'];
+        $columns = [
+            'id',
+            'title',
+            'slug',
+            'description',
+            'parent_id',
+        ];
 
         $result = $this
             ->startConditions()
             ->select($columns)
-            ->with(['parentCategory:id,title']) // Додали цей рядок
-            ->paginate($perPage);
+            ->with(['parentCategory:id,title'])
+            ->when($search, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhereHas('parentCategory', function ($query) use ($search) {
+                            $query->where('title', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->orderBy('id')
+            ->paginate($perPage)
+            ->appends([
+                'search' => $search,
+                'per_page' => $perPage,
+            ]);
 
         return $result;
     }

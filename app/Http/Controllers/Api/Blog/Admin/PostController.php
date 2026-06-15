@@ -25,9 +25,15 @@ class PostController extends BaseController
         $this->blogCategoryRepository = $blogCategoryRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $paginator = $this->blogPostRepository->getAllWithPaginate();
+        $perPage = (int) $request->input('per_page', 25);
+        $perPage = max(1, min($perPage, 100));
+
+        $search = trim((string) $request->input('search', ''));
+        $search = $search !== '' ? $search : null;
+
+        $paginator = $this->blogPostRepository->getAllWithPaginate($perPage, $search);
 
         return PostResource::collection($paginator);
     }

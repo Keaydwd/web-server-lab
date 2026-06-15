@@ -16,24 +16,48 @@ class BlogPostRepository extends CoreRepository
     }
 
     /**
-     * Отримати список статей
-     * * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * Отримати список статей з пошуком і пагінацією.
      */
-    public function getAllWithPaginate()
+    public function getAllWithPaginate($perPage = 25, ?string $search = null)
     {
-        $columns = ['id', 'title', 'slug', 'is_published', 'published_at', 'user_id', 'category_id'];
+        $columns = [
+            'id',
+            'title',
+            'slug',
+            'excerpt',
+            'is_published',
+            'published_at',
+            'user_id',
+            'category_id',
+        ];
 
-        $result = $this->startConditions()
+        $result = $this
+            ->startConditions()
             ->select($columns)
-            ->orderBy('id', 'DESC')
             ->with([
-                'category' => function ($query) {
-                    $query->select(['id', 'title']);
-                },
-                //'category:id,title',
+                'category:id,title',
                 'user:id,name',
             ])
-            ->paginate(25);
+            ->when($search, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('excerpt', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($query) use ($search) {
+                            $query->where('title', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('user', function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->orderBy('id', 'DESC')
+            ->paginate($perPage)
+            ->appends([
+                'search' => $search,
+                'per_page' => $perPage,
+            ]);
 
         return $result;
     }

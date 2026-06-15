@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Blog;
 
 use App\Repositories\BlogPostRepository;
+use Illuminate\Http\Request;
 
 class PostController extends BaseController
 {
@@ -14,9 +15,15 @@ class PostController extends BaseController
     /**
      * Отримати список статей.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->blogPostRepository->getAllWithPaginate();
+        $perPage = (int) $request->input('per_page', 25);
+        $perPage = max(1, min($perPage, 100));
+
+        $search = trim((string) $request->input('search', ''));
+        $search = $search !== '' ? $search : null;
+
+        return $this->blogPostRepository->getAllWithPaginate($perPage, $search);
     }
 
     /**
